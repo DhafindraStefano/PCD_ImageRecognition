@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recognition of Biscuits</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .container-rounded {
+        height: 350px;
+        border-radius: 10px;
+        box-shadow: 0 60px 100px rgba(0, 0, 0, 0.1);
+        padding: 50px;
+        }
+
+        .d-flex {
+            display: flex;
+        }
+
+        .flex-column {
+            flex-direction: column;
+        }
+
+        .justify-content-center {
+            justify-content: center;
+        }
+
+        .align-items-center {
+            align-items: center;
+        }
+
+        #scanButton {
+        width: 400px;
+        border-radius: 40px;
+        }
+
+        .custom-header {
+            margin-bottom: 200px; /* Menambahkan jarak antara header dan body */
+        }
+    </style>
+</head>
+
+<body>
+    <header class="custom-header">
+        <div class="container-fluid" style="background-color:rgb(0, 6, 58);">
+            <h3 style="color: white; padding: 15px;">Recognize Your Biscuit</h3>
+        </div>
+    </header>
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6 text-md-left text-center">
+                <!--gambar-->
+                <img id="uploadedImage" src="C:\Users\p\.vscode\PCD_ImageRecognition\Group3.png" alt="">
+                <h1 class="mt-3">Get Information for Biscuits You Want</h1>
+                <h4>100% Automatically and Free</h4>
+            </div>
+            
+            <div class="col-md-6 text-center">
+                <div class="container-rounded d-flex flex-column justify-content-center align-items-center">
+                    <div id="camera"></div>
+                    <label for="imageInput" class="btn btn-primary mt-3">Choose File</label>
+                    <input type="file" accept="image/*" id="imageInput" class="mt-3 d-none">
+                    <div id="loading" class="mt-3 d-none">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary mt-3" id="scanButton" style="width: 200px;">Scan Image</button>
+                
+                <p></p>
+                <div class="container-rounded d-flex flex-column justify-content-center align-items-center"> 
+                    <h3>Product Information</h3>
+
+                    <div id="result" class="mt-3 d-none">
+                        <p><strong>Name:</strong> <span id="productName"></span></p>
+                        <p><strong>Description:</strong> <span id="productDescription"></span></p>
+                        <p><strong>Price:</strong> <span id="productPrice"></span></p>
+                        <p><strong>Weight:</strong> <span id="productWeight"></span></p>
+                        <p><strong>Calories:</strong> <span id="productKkal"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const imageInput = document.getElementById('imageInput');
+        const scanButton = document.getElementById('scanButton');
+        const loading = document.getElementById('loading');
+        const result = document.getElementById('result');
+
+        scanButton.addEventListener('click', () => {
+            const file = imageInput.files[0];
+            if (!file) {
+                alert('Please upload an image first.');
+                return;
+            }
+
+            loading.classList.remove('d-none');
+            result.classList.add('d-none');
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('http://127.0.0.1:5000/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.classList.add('d-none');
+                displayResult(data);
+            })
+            .catch(error => {
+                loading.classList.add('d-none');
+                alert('Error: ' + error.message);
+            });
+        });
+
+        function displayResult(product) {
+            document.getElementById('productName').textContent = product.nama;
+            document.getElementById('productDescription').textContent = product.deskripsi;
+            document.getElementById('productPrice').textContent = product.harga;
+            document.getElementById('productWeight').textContent = product.berat;
+            document.getElementById('productKkal').textContent = product.kandungan_kkal;
+            result.classList.remove('d-none');
+        }
+    </script>
+</body>
+
+</html>
